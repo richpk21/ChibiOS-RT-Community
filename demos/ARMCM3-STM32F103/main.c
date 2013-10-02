@@ -22,6 +22,9 @@
 #include "hal.h"
 #include "test.h"
 
+#ifdef BOARD_MAPLEMINI_STM32_F103
+	#define BOARD_LED 1
+#endif
 /*
  * Red LED blinker thread, times are in milliseconds.
  */
@@ -30,12 +33,23 @@ static msg_t Thread1(void *arg) {
 
   (void)arg;
   chRegSetThreadName("blinker");
-  while (TRUE) {
-    palClearPad(GPIOC, GPIOC_LED);
-    chThdSleepMilliseconds(500);
-    palSetPad(GPIOC, GPIOC_LED);
-    chThdSleepMilliseconds(500);
-  }
+#ifdef BOARD_MAPLEMINI_STM32_F103
+    while (TRUE) {
+        palClearPad(GPIOB, BOARD_LED);
+        chThdSleepMilliseconds(500);
+        palSetPad(GPIOB, BOARD_LED);
+        chThdSleepMilliseconds(500);
+    }
+#endif
+#ifdef BOARD_OLIMEX_STM32_P103
+    while (TRUE) {
+        palClearPad(GPIOC, GPIOC_LED);
+        chThdSleepMilliseconds(500);
+        palSetPad(GPIOC, GPIOC_LED);
+        chThdSleepMilliseconds(500);
+    }
+#endif
+  return 0;
 }
 
 /*
@@ -67,9 +81,19 @@ int main(void) {
    * Normal main() thread activity, in this demo it does nothing except
    * sleeping in a loop and check the button state.
    */
+
+#ifdef BOARD_MAPLEMINI_STM32_F103
+  while (TRUE) {
+    //if (palReadPad(GPIOA, GPIOA_BUTTON))
+      TestThread(&SD2);
+    chThdSleepMilliseconds(500);
+  }
+#endif
+#ifdef BOARD_OLIMEX_STM32_P103
   while (TRUE) {
     if (palReadPad(GPIOA, GPIOA_BUTTON))
       TestThread(&SD2);
     chThdSleepMilliseconds(500);
   }
+#endif
 }
